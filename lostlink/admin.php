@@ -1,6 +1,9 @@
 <?php
 include "config.php";
 require_admin();
+if (empty($_SESSION["delete_token"])) {
+  $_SESSION["delete_token"] = bin2hex(random_bytes(32));
+}
 $page_title = "Dashboard";
 
 $status = isset($_GET['status']) ? clean($conn, $_GET['status']) : "";
@@ -20,10 +23,26 @@ $a = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS c FROM items WHE
 $b = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS c FROM items WHERE status='Claimed'"));
 $c = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS c FROM items WHERE status='Returned'"));
 
+$users_count = mysqli_fetch_assoc(
+  mysqli_query(
+      $conn,
+      "SELECT COUNT(*) AS total
+       FROM users WHERE role = 'user'"
+  )
+);
+
 include "header.php";
 ?>
 
 <div class="page-head">
+<a href="admin_users.php" class="btn">
+    Manage Registered Users
+</a>
+
+  <a href="admin_claims.php" class="btn">
+      Manage Claim Requests
+  </a>
+
   <h1>CSU Dashboard</h1>
   <a href="add_item.php" class="btn">+ Record Found Item</a>
 </div>
@@ -34,6 +53,10 @@ include "header.php";
   <div class="stat"><h2><?php echo $a['c']; ?></h2><p>Available (unclaimed)</p></div>
   <div class="stat"><h2><?php echo $b['c']; ?></h2><p>Claimed (pending release)</p></div>
   <div class="stat"><h2><?php echo $c['c']; ?></h2><p>Returned to owners</p></div>
+  <div class="stat">
+    <h2><?php echo (int)$users_count["total"]; ?></h2>
+    <p>Registered Users</p>
+</div>
 </section>
 
 <form method="get" class="search inline">
@@ -66,8 +89,20 @@ include "header.php";
     <td><?php echo e($row['claimant_name']); ?></td>
     <td>
       <a href="edit_item.php?id=<?php echo $row['id']; ?>" class="link-btn">Verify / Edit</a>
-      <a href="delete_item.php?id=<?php echo $row['id']; ?>" class="link-btn red" onclick="return confirm('Delete this record?');">Delete</a>
-    </td>
+      <form method="POST"
+      action="delete_item.php"
+      onsubmit="return confirm('Delete this item?');">
+
+    <input type="hidden" name="id"
+           value="<?php echo (int)$row['id']; ?>">
+
+    <input type="hidden" name="delete_token"
+           value="<?php echo e($_SESSION['delete_token']); ?>">
+
+    <button type="submit" class="link-btn red">
+        Delete
+    </button>
+</form>    </td>
   </tr>
   <?php } ?>
 </table>

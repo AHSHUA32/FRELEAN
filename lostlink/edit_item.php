@@ -15,6 +15,31 @@ if (!$row) {
 }
 
 if (isset($_POST['update'])) {
+  $check = mysqli_prepare(
+    $conn,
+    "SELECT COUNT(*) AS total
+     FROM claims WHERE item_id = ?"
+);
+
+mysqli_stmt_bind_param($check, "i", $id);
+mysqli_stmt_execute($check);
+
+$claim_count = mysqli_fetch_assoc(
+    mysqli_stmt_get_result($check)
+)["total"];
+
+mysqli_stmt_close($check);
+
+if ($claim_count > 0) {
+    http_response_code(409);
+    exit(
+        "This item has claim history. " .
+        "Use Claim Management for verification. " .
+        "Editing this item is temporarily restricted."
+    );
+}
+
+
     $item_name = clean($conn, $_POST['item_name']);
     $category = clean($conn, $_POST['category']);
     $description = clean($conn, $_POST['description']);

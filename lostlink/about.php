@@ -1,5 +1,6 @@
 <?php
 include "config.php";
+require_admin();
 $page_title = "About";
 include "header.php";
 ?>

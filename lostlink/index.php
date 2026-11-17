@@ -1,5 +1,7 @@
 <?php
-include "config.php";
+require_once "config.php";
+require_login();
+
 $page_title = "Find Lost Items";
 
 $keyword = isset($_GET['keyword']) ? clean($conn, $_GET['keyword']) : "";

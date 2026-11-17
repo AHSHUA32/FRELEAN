@@ -1,5 +1,6 @@
 <?php
 include "config.php";
+require_admin();
 
 if (!isset($_GET['id'])) {
     header("Location: index.php");
@@ -48,6 +49,30 @@ include "header.php";
     <?php } else { ?>
       <div class="notice gray">This item is already <b><?php echo e(strtolower($row['status'])); ?></b>.</div>
     <?php } ?>
+
+
+<?php if (
+    is_logged_in() &&
+    !is_admin() &&
+    $row["status"] === "Available"
+): ?>
+
+    <div class="notice">
+        <h3>Is this your lost item?</h3>
+
+        <p>
+            Submit a claim request and provide
+            proof of ownership.
+        </p>
+
+        <a href="claim_item.php?id=<?php echo (int)$row["id"]; ?>"
+           class="btn">
+            Claim This Item
+        </a>
+    </div>
+
+<?php endif; ?>
+
 
     <div class="qr-box">
       <div id="qrcode"></div>

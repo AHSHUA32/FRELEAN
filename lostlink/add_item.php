@@ -12,9 +12,20 @@ if (isset($_POST['save'])) {
     $finder_name = clean($conn, $_POST['finder_name']);
     $finder_contact = clean($conn, $_POST['finder_contact']);
     $photo = upload_photo();
+    $recorded_by = (int) $_SESSION["user_id"];
 
-    $sql = "INSERT INTO items (item_name, category, description, location_found, date_found, photo, finder_name, finder_contact, status)
-            VALUES ('$item_name', '$category', '$description', '$location_found', '$date_found', '$photo', '$finder_name', '$finder_contact', 'Available')";
+    
+$sql = "INSERT INTO items
+(item_name, category, description,
+ location_found, date_found, photo,
+ finder_name, finder_contact,
+ status, recorded_by)
+VALUES
+('$item_name', '$category', '$description',
+ '$location_found', '$date_found', '$photo',
+ '$finder_name', '$finder_contact',
+ 'Available', $recorded_by)";
+
     if (mysqli_query($conn, $sql)) {
         header("Location: admin.php?msg=Item recorded successfully. Finder has been credited.");
         exit;
@@ -22,6 +33,15 @@ if (isset($_POST['save'])) {
         $error = "Error: " . mysqli_error($conn);
     }
 }
+
+$item_id = mysqli_insert_id($conn);
+
+log_activity(
+    $_SESSION["user_id"],
+    "FOUND_ITEM_RECORDED",
+    "Recorded found item LL-" .
+    str_pad($item_id, 5, "0", STR_PAD_LEFT)
+);
 include "header.php";
 ?>
 
