@@ -203,6 +203,106 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
+
+// Unified admin tabs.
+$request_role = "admin";
+$request_view = $_GET["view"] ?? "claims";
+
+if (!in_array($request_view, ["reports", "claims"], true)) {
+    $request_view = "claims";
+}
+
+// Show Lost Reports tab without running the claims table query.
+if ($request_view === "reports") {
+    $page_title = "Reports & Claims";
+
+    $reports_sql = "
+        SELECT r.id, r.item_name, r.category,
+               r.location_lost, r.date_lost,
+               r.time_lost, r.status,
+               u.user_code, u.full_name
+        FROM lost_reports r
+        JOIN users u ON r.user_id = u.id
+        ORDER BY r.id DESC
+    ";
+
+    $reports_result = mysqli_query($conn, $reports_sql);
+
+    include "header.php";
+    require __DIR__ . "/request_tabs.php";
+    ?>
+
+    <div class="requests-content">
+        <h2>Lost Item Reports</h2>
+        <p class="muted">
+            Reports submitted by registered users.
+        </p>
+
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Report ID</th>
+                        <th>User ID</th>
+                        <th>Reported By</th>
+                        <th>Item</th>
+                        <th>Location</th>
+                        <th>Date Lost</th>
+                        <th>Time Lost</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php if (mysqli_num_rows($reports_result) === 0): ?>
+                        <tr>
+                            <td colspan="8">
+                                <div class="reports-empty-state">
+                                    <h3>No Lost Reports Yet</h3>
+                                    <p>No reports have been submitted.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+
+                    <?php while ($r = mysqli_fetch_assoc($reports_result)): ?>
+                        <tr>
+                            <td>LR-<?php echo str_pad(
+                                $r["id"], 5, "0", STR_PAD_LEFT
+                            ); ?></td>
+
+                            <td><?php echo e($r["user_code"]); ?></td>
+                            <td><?php echo e($r["full_name"]); ?></td>
+                            <td><?php echo e($r["item_name"]); ?></td>
+                            <td><?php echo e($r["location_lost"]); ?></td>
+                            <td><?php echo e($r["date_lost"]); ?></td>
+
+                            <td>
+                                <?php echo $r["time_lost"]
+                                    ? e(date("h:i A", strtotime($r["time_lost"])))
+                                    : "Not specified"; ?>
+                            </td>
+
+                            <td>
+                                <span class="claim-status <?php
+                                    echo e(strtolower($r["status"]));
+                                ?>">
+                                    <?php echo e($r["status"]); ?>
+                                </span>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <?php
+    include "footer.php";
+    exit;
+}
+
+
 // Display all claims.
 $sql = "SELECT c.id, c.reason, c.status,
                c.created_at,
@@ -220,8 +320,13 @@ $result = mysqli_query($conn, $sql);
 include "header.php";
 ?>
 
-<div class="page-head">
-    <h1>Claim Management</h1>
+<?php include "request_tabs.php"; ?>
+
+<div class="requests-content">
+    <h2>Claim Management</h2>
+    <p class="muted">
+        Verify ownership before approving or rejecting claims.
+    </p>
 </div>
 
 <?php if ($error): ?>
@@ -267,8 +372,11 @@ include "header.php";
 
             <td><?php echo nl2br(e($row["reason"])); ?></td>
 
-            <td><?php echo e($row["status"]); ?></td>
-
+                        <span class="claim-status <?php
+                echo strtolower(e($row["status"]));
+            ?>">
+                <?php echo e($row["status"]); ?>
+            </span>
             <td>
             <?php if (
                 $row["status"] === "Pending" &&

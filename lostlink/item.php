@@ -1,6 +1,6 @@
 <?php
-include "config.php";
-require_admin();
+require_once "config.php";
+require_login();
 
 if (!isset($_GET['id'])) {
     header("Location: index.php");

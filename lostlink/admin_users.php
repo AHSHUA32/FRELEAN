@@ -48,8 +48,9 @@ $result = mysqli_stmt_get_result($stmt);
 include "header.php";
 ?>
 
-<div class="page-head">
-    <h1>Registered Users</h1>
+<div class="admin-page-heading">
+    <h1>Manage Registered Users</h1>
+    <p>View user information, report counts, claims, and activity history.</p>
 </div>
 
 <form method="GET" class="search inline">

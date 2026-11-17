@@ -116,8 +116,12 @@ include "header.php";
 
 <div class="form-card small">
 
-    <h2>Create Account</h2>
-    <p class="muted">Join LostLink today.</p>
+    
+<div class="login-icon">
+    <span>&#128100;</span>
+</div>
+
+<h2>Create your account</h2>
 
     <?php if ($error): ?>
         <div class="alert">

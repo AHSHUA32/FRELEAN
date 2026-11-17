@@ -48,17 +48,49 @@ include "header.php";
 <h2 class="section-title">Found Items (<?php echo mysqli_num_rows($result); ?>)</h2>
 
 <?php if (mysqli_num_rows($result) == 0) { ?>
-  <div class="empty">No matching items found. Try other keywords, or visit the CSU office to ask in person.</div>
+  <div class="empty">
+    <div style="font-size:42px;margin-bottom:12px;">
+        &#128230;
+    </div>
+
+    <h3 style="margin-bottom:8px;color:#111827;">
+        No Found Items Yet
+    </h3>
+
+    <p>
+        No items match your search.
+        Please check again later or contact
+        the Lost &amp; Found Office.
+    </p>
+</div>
+
 <?php } else { ?>
 <div class="grid">
   <?php while ($row = mysqli_fetch_assoc($result)) { ?>
   <a class="card" href="item.php?id=<?php echo $row['id']; ?>">
     <div class="card-img">
-      <?php if ($row['photo'] != "") { ?>
-        <img src="uploads/<?php echo e($row['photo']); ?>" alt="">
-      <?php } else { ?>
-        <span>&#128230;</span>
-      <?php } ?>
+      
+<?php if (!empty($row["photo"])): ?>
+
+<img
+    src="uploads/<?php echo e($row["photo"]); ?>"
+    alt="<?php echo e($row["item_name"]); ?>"
+    loading="lazy"
+    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+>
+
+<span class="item-photo-fallback" style="display:none;">
+    &#128230;
+</span>
+
+<?php else: ?>
+
+<span class="item-photo-fallback">
+    &#128230;
+</span>
+
+<?php endif; ?>
+
     </div>
     <div class="card-body">
       <small><?php echo e($row['category']); ?></small>
@@ -71,14 +103,6 @@ include "header.php";
 </div>
 <?php } ?>
 
-<section class="steps">
-  <h2 class="section-title">How LostLink Works</h2>
-  <div class="step-grid">
-    <div class="step"><b>1</b><h4>Someone finds an item</h4><p>They turn it over to the CSU / Security Office and give their name.</p></div>
-    <div class="step"><b>2</b><h4>CSU records it</h4><p>Authorized personnel record the item and credit the finder.</p></div>
-    <div class="step"><b>3</b><h4>Owner checks LostLink</h4><p>Search the list and view item details before going to CSU.</p></div>
-    <div class="step"><b>4</b><h4>Claim and verify</h4><p>CSU verifies ownership, releases the item, and marks it returned.</p></div>
-  </div>
-</section>
+
 
 <?php include "footer.php"; ?>

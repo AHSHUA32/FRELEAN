@@ -81,8 +81,12 @@ include "header.php";
 
 <div class="form-card small">
 
-    <h2>Welcome to LostLink</h2>
-    <p class="muted">Sign in to your account.</p>
+    
+<div class="login-icon">
+    <span>&#128274;</span>
+</div>
+
+<h2>Welcome back</h2>
 
     <?php if ($error): ?>
         <div class="alert">
@@ -114,10 +118,9 @@ include "header.php";
 
     <p class="muted">Don't have an account?</p>
 
-    <a href="register.php" class="btn full"
-       style="display:block;text-align:center;">
-        Register New Account
-    </a>
+    <a href="register.php" class="btn full register-btn">
+    Create New Account
+</a>
 
 </div>
 
